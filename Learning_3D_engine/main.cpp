@@ -3,8 +3,11 @@
 #include <GL/glu.h>
 #include <GL/freeglut.h>
 #include <cstdlib>
+#include <ctime>
 #include "camera.h"
 #include "lighting.h"
+#include <iostream>
+#include <vector>
 
 int windowWidth = 800;
 int windowHeight = 600;
@@ -15,10 +18,31 @@ DWORD lastTime = 0;
 bool keys[256];
 int centerX, centerY;
 
-void drawColumn(float x, float z, float r, float g, float b) {
+// Globální proměnné pro barvy sloupů
+struct Color {
+    float r, g, b;
+};
+
+std::vector<Color> columnColors;
+
+void initializeColumnColors() {
+    columnColors.clear();
+    for (int i = 0; i < 11; ++i) {
+        for (int j = 0; j < 11; ++j) {
+            Color color = {
+                static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
+                static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
+                static_cast<float>(rand()) / static_cast<float>(RAND_MAX)
+            };
+            columnColors.push_back(color);
+        }
+    }
+}
+
+void drawColumn(float x, float z, const Color& color) {
     glPushMatrix();
     glTranslatef(x, 0.0f, z);
-    glColor3f(r, g, b); // Různé barvy
+    glColor3f(color.r, color.g, color.b);
     glBegin(GL_QUADS);
     // Přední strana
     glVertex3f(-0.5f, 0.0f, 0.5f);
@@ -73,15 +97,19 @@ void display() {
     applyCameraTransformations();
     setLightingPosition(); // Nastavení pozice světla po aplikaci transformačních operací kamery
 
+    // Dočasné vypnutí osvětlení pro vykreslení sloupů
+    glDisable(GL_LIGHTING);
+
     // Vykreslení sloupů
+    int index = 0;
     for (int i = -5; i <= 5; ++i) {
         for (int j = -5; j <= 5; ++j) {
-            float r = (i + 5) / 10.0f;
-            float g = (j + 5) / 10.0f;
-            float b = 0.5f;
-            drawColumn(i * 5.0f, j * 5.0f, r, g, b);
+            drawColumn(i * 5.0f, j * 5.0f, columnColors[index++]);
         }
     }
+
+    // Opětovné zapnutí osvětlení
+    glEnable(GL_LIGHTING);
 
     glutSwapBuffers();
 }
@@ -95,6 +123,10 @@ void initialize() {
     glClearColor(0.5, 0.5, 0.5, 1.0); // Šedé pozadí
     glEnable(GL_DEPTH_TEST);
     initializeLighting();
+
+    // Inicializace náhodných barev sloupů
+    srand(static_cast<unsigned int>(time(0)));
+    initializeColumnColors();
 
     // Skrytí kurzoru a nastavení omezení pohybu kurzoru
     glutSetCursor(GLUT_CURSOR_NONE);
@@ -133,6 +165,12 @@ void keyDown(unsigned char key, int x, int y) {
             // Nastavení pozice myši na střed okna
             glutWarpPointer(centerX, centerY);
         }
+    }
+
+    // Klávesová zkratka pro náhodné změny barev
+    if (key == 'r') {
+        initializeColumnColors();
+        std::cout << "Colors randomized" << std::endl;
     }
 }
 

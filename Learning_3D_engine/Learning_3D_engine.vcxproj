@@ -71,7 +71,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>"$(SolutionDir)Learning_3D_engine\include";$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Learning_3D_engine\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\soil\lib;$(SolutionDir)Dependencies\freeglut\lib\$(Platform);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
