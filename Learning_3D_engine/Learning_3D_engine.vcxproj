@@ -72,7 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)Learning_3D_engine\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Dependencies\soil\lib;$(SolutionDir)Dependencies\freeglut\lib\$(Platform);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)Dependencies\soil\lib;$(SolutionDir)Dependencies\freeglut\lib\$(Platform);$(SolutionDir)Dependencies\glew\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -114,7 +114,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;freeglut.lib;Soil.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;freeglut.lib;Soil.lib;glew32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -137,6 +137,7 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="lighting.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="shader_program.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="textures.cpp" />
     <ClCompile Include="transform.cpp" />
@@ -144,9 +145,14 @@
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="lighting.h" />
+    <ClInclude Include="shader_program.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="textures.h" />
     <ClInclude Include="transform.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\fragment_shader.glsl" />
+    <None Include="shaders\vertex_shader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

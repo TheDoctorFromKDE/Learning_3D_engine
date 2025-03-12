@@ -1,13 +1,18 @@
 ﻿#include <windows.h>
+#include <GL/glew.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/freeglut.h>
 #include <cstdlib>
 #include <ctime>
-#include "camera.h"
-#include "lighting.h"
 #include <iostream>
 #include <vector>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "camera.h"
+#include "lighting.h"
+#include "shader_program.h"
 
 int windowWidth = 800;
 int windowHeight = 600;
@@ -17,6 +22,9 @@ bool isMouseCaptured = false;
 DWORD lastTime = 0;
 bool keys[256];
 int centerX, centerY;
+
+GLuint VAO, VBO, NBO;
+Shader* shaderProgram;
 
 // Globální proměnné pro barvy sloupů
 struct Color {
@@ -42,34 +50,8 @@ void initializeColumnColors() {
 void drawColumn(float x, float z, const Color& color) {
     glPushMatrix();
     glTranslatef(x, 0.0f, z);
-    glColor3f(color.r, color.g, color.b);
-    glBegin(GL_QUADS);
-    // Přední strana
-    glVertex3f(-0.5f, 0.0f, 0.5f);
-    glVertex3f(0.5f, 0.0f, 0.5f);
-    glVertex3f(0.5f, 2.0f, 0.5f);
-    glVertex3f(-0.5f, 2.0f, 0.5f);
-    // Zadní strana
-    glVertex3f(-0.5f, 0.0f, -0.5f);
-    glVertex3f(0.5f, 0.0f, -0.5f);
-    glVertex3f(0.5f, 2.0f, -0.5f);
-    glVertex3f(-0.5f, 2.0f, -0.5f);
-    // Levá strana
-    glVertex3f(-0.5f, 0.0f, -0.5f);
-    glVertex3f(-0.5f, 0.0f, 0.5f);
-    glVertex3f(-0.5f, 2.0f, 0.5f);
-    glVertex3f(-0.5f, 2.0f, -0.5f);
-    // Pravá strana
-    glVertex3f(0.5f, 0.0f, -0.5f);
-    glVertex3f(0.5f, 0.0f, 0.5f);
-    glVertex3f(0.5f, 2.0f, 0.5f);
-    glVertex3f(0.5f, 2.0f, -0.5f);
-    // Horní strana
-    glVertex3f(-0.5f, 2.0f, -0.5f);
-    glVertex3f(0.5f, 2.0f, -0.5f);
-    glVertex3f(0.5f, 2.0f, 0.5f);
-    glVertex3f(-0.5f, 2.0f, 0.5f);
-    glEnd();
+    shaderProgram->setVec3("objectColor", glm::vec3(color.r, color.g, color.b));
+    glDrawArrays(GL_QUADS, 0, 24);
     glPopMatrix();
 }
 
@@ -94,27 +76,43 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    applyCameraTransformations();
-    setLightingPosition(); // Nastavení pozice světla po aplikaci transformačních operací kamery
+    glm::mat4 view = glm::lookAt(glm::vec3(cameraPosX, cameraPosY, cameraPosZ),
+    glm::vec3(cameraPosX + cameraFrontX, cameraPosY + cameraFrontY, cameraPosZ + cameraFrontZ),
+    glm::vec3(cameraUpX, cameraUpY, cameraUpZ));
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 0.1f, 100.0f);
+    shaderProgram->use();
+    shaderProgram->setMat4("view", view);
+    shaderProgram->setMat4("projection", projection);
+    shaderProgram->setVec3("lightPos", glm::vec3(1.0f, 1.0f, 1.0f));
+    shaderProgram->setVec3("viewPos", glm::vec3(cameraPosX, cameraPosY, cameraPosZ));
+    shaderProgram->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
-    // Dočasné vypnutí osvětlení pro vykreslení sloupů
-    glDisable(GL_LIGHTING);
+    // Aktivace VAO
+    glBindVertexArray(VAO);
 
     // Vykreslení sloupů
     int index = 0;
     for (int i = -5; i <= 5; ++i) {
         for (int j = -5; j <= 5; ++j) {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(i * 5.0f, 0.0f, j * 5.0f));
+            shaderProgram->setMat4("model", model);
             drawColumn(i * 5.0f, j * 5.0f, columnColors[index++]);
         }
     }
 
-    // Opětovné zapnutí osvětlení
-    glEnable(GL_LIGHTING);
+    glBindVertexArray(0); // Deaktivace VAO
 
     glutSwapBuffers();
 }
 
 void initialize() {
+    glewExperimental = GL_TRUE; // Potřebné pro některé implementace OpenGL
+    GLenum err = glewInit();
+    if (err != GLEW_OK) {
+        std::cerr << "Error initializing GLEW: " << glewGetErrorString(err) << std::endl;
+        exit(1); // Ukončení programu při chybě
+    }
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(45.0, static_cast<double>(windowWidth) / windowHeight, 1.0, 100.0);
@@ -124,9 +122,87 @@ void initialize() {
     glEnable(GL_DEPTH_TEST);
     initializeLighting();
 
+    // Inicializace shader programu
+    shaderProgram = new Shader("shaders/vertex_shader.glsl", "shaders/fragment_shader.glsl");
+
     // Inicializace náhodných barev sloupů
     srand(static_cast<unsigned int>(time(0)));
     initializeColumnColors();
+
+    // Inicializace VAO a VBO
+    GLfloat vertices[] = {
+        // Přední strana
+        -0.5f, 0.0f,  0.5f,
+         0.5f, 0.0f,  0.5f,
+         0.5f, 2.0f,  0.5f,
+        -0.5f, 2.0f,  0.5f,
+        // Zadní strana
+        -0.5f, 0.0f, -0.5f,
+         0.5f, 0.0f, -0.5f,
+         0.5f, 2.0f, -0.5f,
+        -0.5f, 2.0f, -0.5f,
+        // Levá strana
+        -0.5f, 0.0f, -0.5f,
+        -0.5f, 0.0f,  0.5f,
+        -0.5f, 2.0f,  0.5f,
+        -0.5f, 2.0f, -0.5f,
+        // Pravá strana
+         0.5f, 0.0f, -0.5f,
+         0.5f, 0.0f,  0.5f,
+         0.5f, 2.0f,  0.5f,
+         0.5f, 2.0f, -0.5f,
+         // Horní strana
+         -0.5f, 2.0f, -0.5f,
+          0.5f, 2.0f, -0.5f,
+          0.5f, 2.0f,  0.5f,
+         -0.5f, 2.0f,  0.5f
+    };
+
+    GLfloat normals[] = {
+        // Přední strana
+        0.0f,  0.0f,  1.0f,
+        0.0f,  0.0f,  1.0f,
+        0.0f,  0.0f,  1.0f,
+        0.0f,  0.0f,  1.0f,
+        // Zadní strana
+        0.0f,  0.0f, -1.0f,
+        0.0f,  0.0f, -1.0f,
+        0.0f,  0.0f, -1.0f,
+        0.0f,  0.0f, -1.0f,
+        // Levá strana
+       -1.0f,  0.0f,  0.0f,
+       -1.0f,  0.0f,  0.0f,
+       -1.0f,  0.0f,  0.0f,
+       -1.0f,  0.0f,  0.0f,
+       // Pravá strana
+       1.0f,  0.0f,  0.0f,
+       1.0f,  0.0f,  0.0f,
+       1.0f,  0.0f,  0.0f,
+       1.0f,  0.0f,  0.0f,
+       // Horní strana
+       0.0f,  1.0f,  0.0f,
+       0.0f,  1.0f,  0.0f,
+       0.0f,  1.0f,  0.0f,
+       0.0f,  1.0f,  0.0f
+    };
+
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+    glGenBuffers(1, &NBO);
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, NBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+
+    glBindVertexArray(0);
 
     // Skrytí kurzoru a nastavení omezení pohybu kurzoru
     glutSetCursor(GLUT_CURSOR_NONE);
