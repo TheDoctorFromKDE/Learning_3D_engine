@@ -1,42 +1,43 @@
 ﻿#include "shader_program.h"
-#include <glm/gtc/type_ptr.hpp> // Přidání tohoto řádku pro glm::value_ptr
 #include <fstream>
 #include <sstream>
 #include <iostream>
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath) {
-    // 1. Načtení shaderů ze souborů
+Shader::Shader(const char* vertexPath, const char* fragmentPath)
+{
+    // Načtení vertex shaderu
     std::string vertexCode;
-    std::string fragmentCode;
     std::ifstream vShaderFile;
-    std::ifstream fShaderFile;
-
-    // Zajištění výjimek pro ifstream
     vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
     try {
+        std::stringstream vShaderStream;
         vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
-        std::stringstream vShaderStream, fShaderStream;
-
         vShaderStream << vShaderFile.rdbuf();
-        fShaderStream << fShaderFile.rdbuf();
-
         vShaderFile.close();
-        fShaderFile.close();
-
         vertexCode = vShaderStream.str();
+    }
+    catch (std::ifstream::failure& e) {
+        std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+    }
+    const char* vShaderCode = vertexCode.c_str();
+
+    // Načtení fragment shaderu
+    std::string fragmentCode;
+    std::ifstream fShaderFile;
+    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    try {
+        std::stringstream fShaderStream;
+        fShaderFile.open(fragmentPath);
+        fShaderStream << fShaderFile.rdbuf();
+        fShaderFile.close();
         fragmentCode = fShaderStream.str();
     }
     catch (std::ifstream::failure& e) {
         std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
     }
-
-    const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
 
-    // 2. Kompilace shaderů
+    // Kompilace shaderů
     unsigned int vertex, fragment;
     int success;
     char infoLog[512];
@@ -72,7 +73,7 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
         std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 
-    // Smazání shaderů, už je nepotřebujeme
+    // Vyčištění shaderů
     glDeleteShader(vertex);
     glDeleteShader(fragment);
 }
@@ -93,10 +94,10 @@ void Shader::setFloat(const std::string& name, float value) const {
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
-void Shader::setVec3(const std::string& name, const glm::vec3& value) const {
-    glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
+    glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
-void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
-    glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+void Shader::setVec3(const std::string& name, const glm::vec3& vec) const {
+    glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &vec[0]);
 }

@@ -39,6 +39,12 @@
     <ClCompile Include="shader_program.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="light_source.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sphere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lighting.h">
@@ -59,12 +65,24 @@
     <ClInclude Include="shader_program.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="light_source.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\fragment_shader.glsl">
       <Filter>Shader Files</Filter>
     </None>
     <None Include="shaders\vertex_shader.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\depth_fragment_shader.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\depth_vertex_shader.glsl">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

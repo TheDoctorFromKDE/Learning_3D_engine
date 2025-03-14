@@ -8,7 +8,7 @@
 #include <cmath>
 
 // Globální proměnné pro směr kamery
-float cameraPosX = 0.0f, cameraPosY = 0.0f, cameraPosZ = 3.0f;
+float cameraPosX = 0.0f, cameraPosY = 10.0f, cameraPosZ = 20.0f;
 float cameraFrontX = 0.0f, cameraFrontY = 0.0f, cameraFrontZ = -1.0f;
 float cameraUpX = 0.0f, cameraUpY = 1.0f, cameraUpZ = 0.0f;
 float yaw = -90.0f; // Inicializace na -90.0 stupňů, protože initialně směřuje na -Z
@@ -30,19 +30,21 @@ void moveCameraBackward(float distance) {
     cameraPosZ -= cameraFrontZ * distance;
 }
 
-void moveCameraLeft(float distance) {
+void moveCameraRight(float distance) {
     float cameraRightX = cameraFrontZ;
     float cameraRightZ = -cameraFrontX;
     cameraPosX -= cameraRightX * distance;
     cameraPosZ -= cameraRightZ * distance;
 }
 
-void moveCameraRight(float distance) {
+void moveCameraLeft(float distance) {
     float cameraRightX = cameraFrontZ;
     float cameraRightZ = -cameraFrontX;
     cameraPosX += cameraRightX * distance;
     cameraPosZ += cameraRightZ * distance;
 }
+
+// Add Up & Down camera movement
 
 void processMouseMovement(int xOffset, int yOffset) {
     float sensitivity = 0.1f;
