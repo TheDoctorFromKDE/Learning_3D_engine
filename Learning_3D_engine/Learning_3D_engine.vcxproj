@@ -138,9 +138,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="colors.cpp" />
+    <ClCompile Include="globals.cpp" />
+    <ClCompile Include="init.cpp" />
+    <ClCompile Include="input.cpp" />
     <ClCompile Include="lighting.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="light_source.cpp" />
+    <ClCompile Include="render.cpp" />
     <ClCompile Include="sphere.cpp" />
     <ClCompile Include="shader_program.cpp" />
     <ClCompile Include="stb_image.cpp" />
@@ -149,8 +154,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
+    <ClInclude Include="colors.h" />
+    <ClInclude Include="globals.h" />
+    <ClInclude Include="init.h" />
+    <ClInclude Include="input.h" />
     <ClInclude Include="lighting.h" />
     <ClInclude Include="light_source.h" />
+    <ClInclude Include="render.h" />
     <ClInclude Include="sphere.h" />
     <ClInclude Include="shader_program.h" />
     <ClInclude Include="stb_image.h" />
@@ -158,6 +168,9 @@
     <ClInclude Include="transform.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\lighting_pass.frag" />
+    <None Include="shaders\geometry_pass.frag" />
+    <None Include="shaders\geometry_pass.vert" />
     <None Include="shaders\depth_fragment_shader.glsl" />
     <None Include="shaders\depth_vertex_shader.glsl" />
     <None Include="shaders\fragment_shader.glsl" />

@@ -45,6 +45,21 @@
     <ClCompile Include="sphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="init.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="colors.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="globals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lighting.h">
@@ -71,6 +86,21 @@
     <ClInclude Include="sphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="init.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="colors.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="render.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="globals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\fragment_shader.glsl">
@@ -83,6 +113,15 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="shaders\depth_vertex_shader.glsl">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\geometry_pass.vert">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\geometry_pass.frag">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="shaders\lighting_pass.frag">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>
